@@ -1,0 +1,151 @@
+# VBA Script used to complete Module 2 Challenge
+
+Sub Multiple_Year_StockData():
+
+    For Each ws In Worksheets
+    
+        Dim WksheetName As String
+        'Start row for loop
+        Dim i As Long
+        'Start row for loop to calculate each ticker's stats
+        Dim j As Long
+        'Variable to find unique tickers & add them to column I
+        Dim TickerCount As Long
+        'Find last row of column A (All Tickers)
+        Dim LastRowA As Long
+        'Find last row column I (All unique Tickers)
+        Dim LastRowI As Long
+        
+        'All calculation Variables:
+        Dim GreatestVol As Double
+        Dim GreatesDec As Double
+        Dim PercentChange As Double
+        Dim GreatestInc As Double
+        Dim GreatestDec As Double
+
+        
+        WksheetName = ws.Name
+        
+        'Column headers
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        ws.Cells(1, 16).Value = "Ticker"
+        ws.Cells(1, 17).Value = "Value"
+        ws.Cells(2, 15).Value = "Greatest % Increase"
+        ws.Cells(3, 15).Value = "Greatest % Decrease"
+        ws.Cells(4, 15).Value = "Greatest Total Volume"
+        
+        'Set Ticker Counter to first row (because of headers)
+        TickerCount = 2
+        
+        'Set start row to 2 (because of headers)
+        j = 2
+        
+        'Find the last used cell in column A
+        LastRowA = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+            'Loop through all rows
+            For i = 2 To LastRowA
+            
+                'Find each unique Tickerm add it to column I
+                If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+                
+                ws.Cells(TickerCount, 9).Value = ws.Cells(i, 1).Value
+                
+                'Calculate Yearly Change & add it to column J (#10)
+                ws.Cells(TickerCount, 10).Value = ws.Cells(i, 6).Value - ws.Cells(j, 3).Value
+                
+                    'Change color of cells based on yearly change value
+                    If ws.Cells(TickerCount, 10).Value < 0 Then
+                
+                    ws.Cells(TickerCount, 10).Interior.Color = RGB(255, 0, 0)
+                
+                    Else
+                
+                    ws.Cells(TickerCount, 10).Interior.Color = RGB(0, 255, 0)
+    
+                
+                    End If
+                    
+                    'Calculate percent change & add it to column K (#11)
+                    If ws.Cells(j, 3).Value <> 0 Then
+                    PercentChange = ((ws.Cells(i, 6).Value - ws.Cells(j, 3).Value) / ws.Cells(j, 3).Value)
+                    
+                    ws.Cells(TickerCount, 11).Value = Format(PercentChange, "Percent")
+                    
+                    Else
+                    
+                    ws.Cells(TickerCount, 11).Value = Format(0, "Percent")
+                    
+                    End If
+                    
+                'Calculate total volume & add it to column L (#12)
+                ws.Cells(TickerCount, 12).Value = WorksheetFunction.Sum(Range(ws.Cells(j, 7), ws.Cells(i, 7)))
+                
+                'Increase Variables TickerCount & j for next loop
+                TickerCount = TickerCount + 1
+                
+                j = i + 1
+                
+                End If
+            
+            Next i
+            
+        'Find last used cell in column I
+        LastRowI = ws.Cells(Rows.Count, 9).End(xlUp).Row
+        
+        
+        GreatestVol = ws.Cells(2, 12).Value
+        GreatestInc = ws.Cells(2, 11).Value
+        GreatestDec = ws.Cells(2, 11).Value
+        
+            'Loop for overall calculations
+            For i = 2 To LastRowI
+            
+                'Greatest Volume Calculations
+                If ws.Cells(i, 12).Value > GreatestVol Then
+                GreatestVol = ws.Cells(i, 12).Value
+                ws.Cells(4, 16).Value = ws.Cells(i, 9).Value
+                
+                Else
+                
+                GreatestVol = GreatestVol
+                
+                End If
+                
+                'Greatest Increase Calculations
+                If ws.Cells(i, 11).Value > GreatestInc Then
+                GreatestInc = ws.Cells(i, 11).Value
+                ws.Cells(2, 16).Value = ws.Cells(i, 9).Value
+                
+                Else
+                
+                GreatestInc = GreatestInc
+                
+                End If
+                
+                'Greatest Decrease Calculations
+                If ws.Cells(i, 11).Value < GreatestDec Then
+                GreatestDec = ws.Cells(i, 11).Value
+                ws.Cells(3, 16).Value = ws.Cells(i, 9).Value
+                
+                Else
+                
+                GreatestDec = GreatestDec
+                
+                End If
+                
+            'Format for overall calculations
+            ws.Cells(2, 17).Value = Format(GreatestInc, "Percent")
+            ws.Cells(3, 17).Value = Format(GreatestDec, "Percent")
+            ws.Cells(4, 17).Value = Format(GreatestVol, "Scientific")
+            
+            Next i
+            
+        Worksheets(WksheetName).Columns("A:Z").AutoFit
+            
+    Next ws
+        
+End Sub
